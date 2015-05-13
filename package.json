@@ -24,6 +24,7 @@
   "dependencies": {
     "ejson": "^2.0.1",
     "faye-websocket": "^0.9.0",
-    "harmony-reflect": "^1.1.1"
+    "harmony-reflect": "^1.1.1",
+    "sockjs": "0.3.15"
   }
 }

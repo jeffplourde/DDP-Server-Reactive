@@ -3,7 +3,7 @@ require('harmony-reflect');
 var DDPServer = function(opts) {
 
   opts = opts || {};
-  var WebSocket = require('faye-websocket'),
+  var sockjs = require('sockjs'),
       EJSON = require('ejson'),
       http = require('http'),
       server = opts.httpServer,
@@ -17,18 +17,17 @@ var DDPServer = function(opts) {
     server = http.createServer()
     server.listen(opts.port || 3000);
   }
-  
-  server.on('upgrade', function (request, socket, body) {
-    if (WebSocket.isWebSocket(request)) {
-      var ws = new WebSocket(request, socket, body);
-      var session_id = "" + new Date().getTime();
-      subscriptions[session_id] = {};
+  var sockjsServer = sockjs.createServer({ sockjs_url: "http://cdn.jsdelivr.net/sockjs/0.3.15/sockjs.min.js"});
 
-      function sendMessage(data) {
-        ws.send(EJSON.stringify(data));
-      }
+  sockjsServer.on('connection', function (conn) {
+  	var session_id = ""+conn.remoteAddress+new Date().getTime();
+  	subscriptions[session_id] = conn;
 
-      ws.on('message', function(event) {
+	function sendMessage(data) {
+		conn.write(EJSON.stringify(data));
+	}
+
+      conn.on('data', function(data) {
         var data = JSON.parse(event.data);
 
         switch (data.msg) {
@@ -147,12 +146,12 @@ var DDPServer = function(opts) {
         }
       });
 
-      ws.on('close', function(event) {
+      conn.on('close', function(event) {
         delete subscriptions[session_id];
         ws = null;
         session_id = null;
       });
-    }
+    
   });
 
   this.methods = function(newMethods) {
@@ -232,6 +231,7 @@ var DDPServer = function(opts) {
       }
     });
   }
+  sockjsServer.installHandlers(server);
 }
 
 module.exports = DDPServer
