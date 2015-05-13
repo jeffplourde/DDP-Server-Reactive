@@ -28,7 +28,7 @@ var DDPServer = function(opts) {
 	}
 
       conn.on('data', function(data) {
-        var data = JSON.parse(event.data);
+       // var data = JSON.parse(event.data);
 
         switch (data.msg) {
 
