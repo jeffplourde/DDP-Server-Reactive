@@ -231,7 +231,7 @@ var DDPServer = function(opts) {
       }
     });
   }
-  sockjsServer.installHandlers(server);
+  sockjsServer.installHandlers(server, {prefix:'/sockjs'});
 }
 
 module.exports = DDPServer
