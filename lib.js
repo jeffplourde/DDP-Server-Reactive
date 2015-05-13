@@ -8,6 +8,7 @@ var DDPServer = function(opts) {
       http = require('http'),
       server = opts.httpServer,
       methods = opts.methods || {},
+      subHandler = opts.subHandler,
       collections = {},
       subscriptions = {},
       self = this;
@@ -116,6 +117,13 @@ var DDPServer = function(opts) {
           };
 
           var docs = collections[data.name];
+
+          // Second chance
+          if(!docs && subHandler) {
+          	subHandler(data.name);
+          	docs = collections[data.name];
+          }
+
           for (var id in docs)
             subscriptions[session_id][data.name].added(id, docs[id]);
 
